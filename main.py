@@ -1,5 +1,5 @@
 import tkinter as tk
-from pet import DesktopPet
+from desktop_pet.pet import DesktopPet
 
 if __name__ == "__main__":
     root = tk.Tk()
