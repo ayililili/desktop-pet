@@ -23,3 +23,18 @@ python main.py
 
 The application will create a frameless window with an animated GIF of the pet.
 
+## Release
+
+To build a standalone executable, install PyInstaller:
+
+```bash
+pip install pyinstaller
+```
+
+Generate the executable from `main.py`:
+
+```bash
+pyinstaller --onefile --add-data "assets{}assets" main.py
+```
+
+Replace `{}` with `;` on Windows or `:` on Linux/macOS. PyInstaller places the output under the `dist/` directory. Ensure the `assets/` folder sits alongside the executable if you do not embed it.
