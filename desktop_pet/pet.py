@@ -14,7 +14,14 @@ class PetState(Enum):
 
 
 class DesktopPet:
-    def __init__(self, master, gif_right_path, gif_left_path, start_pos=(100, 300), max_dash_distance=300):
+    def __init__(
+        self,
+        master,
+        gif_right_path,
+        gif_left_path,
+        start_pos=(100, 300),
+        max_dash_distance=200,
+    ):
         self.master = master
         self.master.overrideredirect(True)
         self.master.wm_attributes("-topmost", True)
@@ -92,17 +99,9 @@ class DesktopPet:
 
     def auto_move(self):
         if self.state not in (PetState.DRAG, PetState.DASH):
-            pointer_x = self.master.winfo_pointerx()
-            pointer_y = self.master.winfo_pointery()
-            dx = pointer_x - (self.pos_x + 50)
-            dy = pointer_y - (self.pos_y + 50)
-            distance = (dx ** 2 + dy ** 2) ** 0.5
-
-            if distance < 50:
-                self.set_idle()
-            elif random.random() < 0.1:
+            if random.random() < 0.01:
                 self.start_dash()
-            elif random.random() < 0.2:
+            elif random.random() < 0.1:
                 self.set_idle()
             else:
                 step_x = 15
@@ -150,7 +149,7 @@ class DesktopPet:
 
         dx = pointer_x - self.pos_x
         dy = pointer_y - self.pos_y
-        distance = (dx ** 2 + dy ** 2) ** 0.5
+        distance = (dx**2 + dy**2) ** 0.5
 
         if distance > self.max_dash_distance:
             scale = self.max_dash_distance / distance
