@@ -14,7 +14,7 @@ class PetState(Enum):
 
 
 class DesktopPet:
-    def __init__(self, master, gif_right_path, gif_left_path, start_pos=(100, 300)):
+    def __init__(self, master, gif_right_path, gif_left_path, start_pos=(100, 300), max_dash_distance=300):
         self.master = master
         self.master.overrideredirect(True)
         self.master.wm_attributes("-topmost", True)
@@ -42,6 +42,7 @@ class DesktopPet:
         self.dash_remaining = 0
         self.dash_step_x = 0
         self.dash_step_y = 0
+        self.max_dash_distance = max_dash_distance
 
         # 拖曳
         self.label.bind("<Button-1>", self.start_drag)
@@ -139,9 +140,20 @@ class DesktopPet:
         pointer_x = self.master.winfo_pointerx()
         pointer_y = self.master.winfo_pointery()
 
+        dx = pointer_x - self.pos_x
+        dy = pointer_y - self.pos_y
+        distance = (dx ** 2 + dy ** 2) ** 0.5
+
+        if distance > self.max_dash_distance:
+            scale = self.max_dash_distance / distance
+            pointer_x = self.pos_x + dx * scale
+            pointer_y = self.pos_y + dy * scale
+            dx = pointer_x - self.pos_x
+            dy = pointer_y - self.pos_y
+
         steps = 10
-        self.dash_step_x = (pointer_x - self.pos_x) / steps
-        self.dash_step_y = (pointer_y - self.pos_y) / steps
+        self.dash_step_x = dx / steps
+        self.dash_step_y = dy / steps
         self.dash_remaining = steps
 
         self.direction = 1 if self.dash_step_x >= 0 else -1
