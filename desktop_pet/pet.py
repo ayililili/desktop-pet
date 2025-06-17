@@ -42,6 +42,7 @@ class DesktopPet:
 
         self.idx = 0
         self.direction = 1
+        self.walk_steps_remaining = 0
         self.state = PetState.IDLE
         self.pos_x, self.pos_y = start_pos
 
@@ -107,11 +108,14 @@ class DesktopPet:
                 step_x = 15
                 step_y = random.choice([-3, 0, 3])
 
-                self.direction = random.choice([-1, 1])
+                if self.walk_steps_remaining <= 0:
+                    self.direction = random.choice([-1, 1])
+                    self.walk_steps_remaining = random.randint(3, 7)
                 self.current_frames = (
                     self.frames_right if self.direction == 1 else self.frames_left
                 )
                 self.set_walk()
+                self.walk_steps_remaining -= 1
 
                 self.pos_x += step_x * self.direction
                 self.pos_y += step_y
