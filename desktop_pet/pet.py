@@ -1,6 +1,7 @@
 import tkinter as tk
 import random
 import ctypes
+import sys
 from enum import Enum, auto
 
 from .utils import resource_path, load_gif_frames
@@ -25,13 +26,25 @@ class DesktopPet:
         self.master = master
         self.master.overrideredirect(True)
         self.master.wm_attributes("-topmost", True)
-        self.master.wm_attributes("-transparentcolor", "white")
+        try:
+            # Windows supports transparentcolor and multi-monitor metrics
+            self.master.wm_attributes("-transparentcolor", "white")
+        except tk.TclError:
+            # Other platforms use a different attribute name for transparency
+            self.master.attributes("-transparent", "white")
 
-        user32 = ctypes.windll.user32
-        self.virtual_origin_x = user32.GetSystemMetrics(76)
-        self.virtual_origin_y = user32.GetSystemMetrics(77)
-        self.virtual_width = user32.GetSystemMetrics(78)
-        self.virtual_height = user32.GetSystemMetrics(79)
+        if sys.platform.startswith("win"):
+            user32 = ctypes.windll.user32
+            self.virtual_origin_x = user32.GetSystemMetrics(76)
+            self.virtual_origin_y = user32.GetSystemMetrics(77)
+            self.virtual_width = user32.GetSystemMetrics(78)
+            self.virtual_height = user32.GetSystemMetrics(79)
+        else:
+            # Fall back to the main screen size on non-Windows systems
+            self.virtual_origin_x = 0
+            self.virtual_origin_y = 0
+            self.virtual_width = self.master.winfo_screenwidth()
+            self.virtual_height = self.master.winfo_screenheight()
 
         self.frames_right = load_gif_frames(resource_path(gif_right_path))
         self.frames_left = load_gif_frames(resource_path(gif_left_path))
