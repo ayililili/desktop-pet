@@ -1,17 +1,15 @@
 import tkinter as tk
-from PIL import Image, ImageTk
 import random
 import ctypes
-import os
-import sys
+from enum import Enum, auto
+
+from .utils import resource_path, load_gif_frames
 
 
-def resource_path(relative_path):
-    try:
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(".")
-    return os.path.join(base_path, relative_path)
+class PetState(Enum):
+    IDLE = auto()
+    WALK = auto()
+    DRAG = auto()
 
 
 class DesktopPet:
@@ -27,8 +25,8 @@ class DesktopPet:
         self.virtual_width = user32.GetSystemMetrics(78)
         self.virtual_height = user32.GetSystemMetrics(79)
 
-        self.frames_right = self.load_gif_frames(resource_path(gif_right_path))
-        self.frames_left = self.load_gif_frames(resource_path(gif_left_path))
+        self.frames_right = load_gif_frames(resource_path(gif_right_path))
+        self.frames_left = load_gif_frames(resource_path(gif_left_path))
         self.current_frames = self.frames_right
 
         self.label = tk.Label(master, bg="white")
@@ -36,7 +34,7 @@ class DesktopPet:
 
         self.idx = 0
         self.direction = 1
-        self.is_dragging = False
+        self.state = PetState.IDLE
         self.pos_x, self.pos_y = start_pos
 
         # 拖曳
@@ -54,17 +52,6 @@ class DesktopPet:
         self.auto_move()
         self.master.geometry(f"+{self.pos_x}+{self.pos_y}")
 
-    def load_gif_frames(self, path):
-        img = Image.open(path)
-        frames = []
-        try:
-            while True:
-                img.seek(len(frames))
-                frames.append(ImageTk.PhotoImage(img.copy()))
-        except EOFError:
-            pass
-        return frames
-
     def animate(self):
         frame = self.current_frames[self.idx]
         self.label.config(image=frame)
@@ -72,11 +59,14 @@ class DesktopPet:
         self.master.after(100, self.animate)
 
     def start_drag(self, event):
-        self.is_dragging = True
+        self.state = PetState.DRAG
         self.offset_x = event.x
         self.offset_y = event.y
 
     def on_drag(self, event):
+        if self.state != PetState.DRAG:
+            return
+
         new_x = event.x_root - self.offset_x
         new_y = event.y_root - self.offset_y
 
@@ -91,10 +81,10 @@ class DesktopPet:
         self.master.geometry(f"+{self.pos_x}+{self.pos_y}")
 
     def stop_drag(self, event):
-        self.is_dragging = False
+        self.state = PetState.IDLE
 
     def auto_move(self):
-        if not self.is_dragging:
+        if self.state != PetState.DRAG:
             if random.random() < 0.2:
                 self.set_idle()
             else:
@@ -127,12 +117,14 @@ class DesktopPet:
             self.frames_right if self.direction == 1 else self.frames_left
         )
         self.idx = 0
+        self.state = PetState.IDLE
 
     def set_walk(self):
         self.current_frames = (
             self.frames_right if self.direction == 1 else self.frames_left
         )
         self.idx = 0
+        self.state = PetState.WALK
 
     def move_to(self, x, y):
         self.pos_x = x
