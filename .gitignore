@@ -1,17 +1,11 @@
-# Byte-compiled / optimized / DLL files
+# Python 編譯暫存
 __pycache__/
 *.py[cod]
-*.so
 
-# Distribution / packaging
-.Python
-env/
-venv/
+# PyInstaller build
+*.spec
 build/
 dist/
-*.egg-info/
 
-# Installer logs
-pip-log.txt
-
-
+# VSCode 或其他編輯器設定
+.vscode/
