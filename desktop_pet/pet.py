@@ -10,6 +10,7 @@ class PetState(Enum):
     IDLE = auto()
     WALK = auto()
     DRAG = auto()
+    DASH = auto()
 
 
 class DesktopPet:
@@ -36,6 +37,11 @@ class DesktopPet:
         self.direction = 1
         self.state = PetState.IDLE
         self.pos_x, self.pos_y = start_pos
+
+        # Dash related
+        self.dash_remaining = 0
+        self.dash_step_x = 0
+        self.dash_step_y = 0
 
         # 拖曳
         self.label.bind("<Button-1>", self.start_drag)
@@ -84,8 +90,10 @@ class DesktopPet:
         self.state = PetState.IDLE
 
     def auto_move(self):
-        if self.state != PetState.DRAG:
-            if random.random() < 0.2:
+        if self.state not in (PetState.DRAG, PetState.DASH):
+            if random.random() < 0.1:
+                self.start_dash()
+            elif random.random() < 0.2:
                 self.set_idle()
             else:
                 step_x = 15
@@ -108,7 +116,7 @@ class DesktopPet:
                 max_y = self.virtual_origin_y + self.virtual_height - 100
                 self.pos_y = max(min_y, min(self.pos_y, max_y))
 
-                self.master.geometry(f"+{self.pos_x}+{self.pos_y}")
+                self.master.geometry(f"+{int(self.pos_x)}+{int(self.pos_y)}")
 
         self.master.after(1000, self.auto_move)
 
@@ -125,6 +133,44 @@ class DesktopPet:
         )
         self.idx = 0
         self.state = PetState.WALK
+
+    def start_dash(self):
+        """Start a short dash toward the current mouse cursor position."""
+        pointer_x = self.master.winfo_pointerx()
+        pointer_y = self.master.winfo_pointery()
+
+        steps = 10
+        self.dash_step_x = (pointer_x - self.pos_x) / steps
+        self.dash_step_y = (pointer_y - self.pos_y) / steps
+        self.dash_remaining = steps
+
+        self.direction = 1 if self.dash_step_x >= 0 else -1
+        self.current_frames = (
+            self.frames_right if self.direction == 1 else self.frames_left
+        )
+        self.state = PetState.DASH
+        self.dash_move()
+
+    def dash_move(self):
+        if self.dash_remaining <= 0 or self.state != PetState.DASH:
+            self.state = PetState.IDLE
+            return
+
+        self.pos_x += self.dash_step_x
+        self.pos_y += self.dash_step_y
+
+        min_x = self.virtual_origin_x
+        max_x = self.virtual_origin_x + self.virtual_width - 100
+        self.pos_x = max(min_x, min(self.pos_x, max_x))
+
+        min_y = self.virtual_origin_y
+        max_y = self.virtual_origin_y + self.virtual_height - 100
+        self.pos_y = max(min_y, min(self.pos_y, max_y))
+
+        self.master.geometry(f"+{int(self.pos_x)}+{int(self.pos_y)}")
+
+        self.dash_remaining -= 1
+        self.master.after(50, self.dash_move)
 
     def move_to(self, x, y):
         self.pos_x = x
