@@ -62,7 +62,6 @@ class DesktopPet:
         # Dash related
         self.dash_remaining = 0
         self.dash_step_x = 0
-        self.dash_step_y = 0
         self.max_dash_distance = max_dash_distance
 
         # 拖曳
@@ -96,6 +95,7 @@ class DesktopPet:
             return
 
         new_x = event.x_root - self.offset_x
+        new_y = event.y_root - self.offset_y
 
         if new_x > self.pos_x:
             self.direction = 1
@@ -104,7 +104,7 @@ class DesktopPet:
             self.direction = -1
             self.current_frames = self.frames_left
 
-        self.pos_x = new_x
+        self.pos_x, self.pos_y = new_x, new_y
         self.master.geometry(f"+{self.pos_x}+{self.pos_y}")
 
     def stop_drag(self, event):
@@ -156,21 +156,17 @@ class DesktopPet:
     def start_dash(self):
         """Start a short dash toward the current mouse cursor position."""
         pointer_x = self.master.winfo_pointerx()
-        pointer_y = self.pos_y
 
         dx = pointer_x - self.pos_x
-        dy = 0
         distance = abs(dx)
 
         if distance > self.max_dash_distance:
             scale = self.max_dash_distance / distance
             pointer_x = self.pos_x + dx * scale
             dx = pointer_x - self.pos_x
-            dy = 0
 
         steps = 10
         self.dash_step_x = dx / steps
-        self.dash_step_y = 0
         self.dash_remaining = steps
 
         self.direction = 1 if self.dash_step_x >= 0 else -1
