@@ -118,8 +118,8 @@ class DesktopPet:
             elif random.random() < 0.1:
                 self.set_idle()
             else:
-                step_x = 15
-                step_y = random.choice([-3, 0, 3])
+                step_x = 8
+                step_y = random.choice([-2, 0, 2])
 
                 if self.walk_steps_remaining <= 0:
                     self.direction = random.choice([-1, 1])
