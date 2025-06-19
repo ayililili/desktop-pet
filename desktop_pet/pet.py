@@ -62,7 +62,6 @@ class DesktopPet:
         # Dash related
         self.dash_remaining = 0
         self.dash_step_x = 0
-        self.dash_step_y = 0
         self.max_dash_distance = max_dash_distance
 
         # 拖曳
@@ -74,7 +73,7 @@ class DesktopPet:
         self.label.bind("<Button-3>", self.show_menu)
 
         self.menu = tk.Menu(master, tearoff=0)
-        self.menu.add_command(label="退出", command=master.destroy)
+        self.menu.add_command(label="再見鴨鴨", command=master.destroy)
 
         self.animate()
         self.auto_move()
@@ -119,7 +118,6 @@ class DesktopPet:
                 self.set_idle()
             else:
                 step_x = 8
-                step_y = random.choice([-2, 0, 2])
 
                 if self.walk_steps_remaining <= 0:
                     self.direction = random.choice([-1, 1])
@@ -131,15 +129,10 @@ class DesktopPet:
                 self.walk_steps_remaining -= 1
 
                 self.pos_x += step_x * self.direction
-                self.pos_y += step_y
 
                 min_x = self.virtual_origin_x
                 max_x = self.virtual_origin_x + self.virtual_width - 100
                 self.pos_x = max(min_x, min(self.pos_x, max_x))
-
-                min_y = self.virtual_origin_y
-                max_y = self.virtual_origin_y + self.virtual_height - 100
-                self.pos_y = max(min_y, min(self.pos_y, max_y))
 
                 self.master.geometry(f"+{int(self.pos_x)}+{int(self.pos_y)}")
 
@@ -162,22 +155,17 @@ class DesktopPet:
     def start_dash(self):
         """Start a short dash toward the current mouse cursor position."""
         pointer_x = self.master.winfo_pointerx()
-        pointer_y = self.master.winfo_pointery()
 
         dx = pointer_x - self.pos_x
-        dy = pointer_y - self.pos_y
-        distance = (dx**2 + dy**2) ** 0.5
+        distance = abs(dx)
 
         if distance > self.max_dash_distance:
             scale = self.max_dash_distance / distance
             pointer_x = self.pos_x + dx * scale
-            pointer_y = self.pos_y + dy * scale
             dx = pointer_x - self.pos_x
-            dy = pointer_y - self.pos_y
 
         steps = 10
         self.dash_step_x = dx / steps
-        self.dash_step_y = dy / steps
         self.dash_remaining = steps
 
         self.direction = 1 if self.dash_step_x >= 0 else -1
@@ -193,25 +181,19 @@ class DesktopPet:
             return
 
         self.pos_x += self.dash_step_x
-        self.pos_y += self.dash_step_y
 
         min_x = self.virtual_origin_x
         max_x = self.virtual_origin_x + self.virtual_width - 100
         self.pos_x = max(min_x, min(self.pos_x, max_x))
-
-        min_y = self.virtual_origin_y
-        max_y = self.virtual_origin_y + self.virtual_height - 100
-        self.pos_y = max(min_y, min(self.pos_y, max_y))
 
         self.master.geometry(f"+{int(self.pos_x)}+{int(self.pos_y)}")
 
         self.dash_remaining -= 1
         self.master.after(50, self.dash_move)
 
-    def move_to(self, x, y):
+    def move_to(self, x, y=None):
         self.pos_x = x
-        self.pos_y = y
-        self.master.geometry(f"+{x}+{y}")
+        self.master.geometry(f"+{int(x)}+{int(self.pos_y)}")
 
     # ✅ 右鍵選單顯示
     def show_menu(self, event):
