@@ -73,7 +73,7 @@ class DesktopPet:
         self.label.bind("<Button-3>", self.show_menu)
 
         self.menu = tk.Menu(master, tearoff=0)
-        self.menu.add_command(label="退出", command=master.destroy)
+        self.menu.add_command(label="再見鴨鴨", command=master.destroy)
 
         self.animate()
         self.auto_move()
@@ -134,7 +134,6 @@ class DesktopPet:
                 max_x = self.virtual_origin_x + self.virtual_width - 100
                 self.pos_x = max(min_x, min(self.pos_x, max_x))
 
-
                 self.master.geometry(f"+{int(self.pos_x)}+{int(self.pos_y)}")
 
         self.master.after(1000, self.auto_move)
@@ -186,7 +185,6 @@ class DesktopPet:
         min_x = self.virtual_origin_x
         max_x = self.virtual_origin_x + self.virtual_width - 100
         self.pos_x = max(min_x, min(self.pos_x, max_x))
-
 
         self.master.geometry(f"+{int(self.pos_x)}+{int(self.pos_y)}")
 
