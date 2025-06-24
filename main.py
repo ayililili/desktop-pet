@@ -4,7 +4,8 @@ from desktop_pet.pet import DesktopPet
 if __name__ == "__main__":
     root = tk.Tk()
     start_x = 100
-    start_y = 300
+    # Position the pet 48px up from the bottom of the screen
+    start_y = root.winfo_screenheight() - 48
     pet = DesktopPet(
         master=root,
         gif_right_path="assets/pet_right.gif",
