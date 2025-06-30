@@ -112,7 +112,13 @@ class DesktopPet:
 
     def auto_move(self):
         if self.state not in (PetState.DRAG, PetState.DASH):
-            if random.random() < 0.01:
+            pointer_x = self.master.winfo_pointerx()
+            pointer_y = self.master.winfo_pointery()
+            dx = pointer_x - self.pos_x
+            dy = pointer_y - self.pos_y
+            distance = (dx**2 + dy**2) ** 0.5
+
+            if distance <= 300:
                 self.start_dash()
             elif random.random() < 0.1:
                 self.set_idle()
@@ -153,16 +159,16 @@ class DesktopPet:
         self.state = PetState.WALK
 
     def start_dash(self):
-        """Start a short dash toward the current mouse cursor position."""
-        pointer_x = self.master.winfo_pointerx()
+        """Start a short dash along the x-axis toward the cursor's y position."""
+        pointer_y = self.master.winfo_pointery()
 
-        dx = pointer_x - self.pos_x
+        dx = pointer_y - self.pos_x
         distance = abs(dx)
 
         if distance > self.max_dash_distance:
             scale = self.max_dash_distance / distance
-            pointer_x = self.pos_x + dx * scale
-            dx = pointer_x - self.pos_x
+            pointer_y = self.pos_x + dx * scale
+            dx = pointer_y - self.pos_x
 
         steps = 10
         self.dash_step_x = dx / steps

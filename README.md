@@ -1,6 +1,6 @@
 # Desktop Pet
 
-A simple desktop pet implemented in Python with `tkinter`. The pet walks around the screen and can be dragged with the mouse. It occasionally performs a short dash toward the cursor. When walking normally, the pet now chooses a direction and continues for a few steps before deciding where to go next. The code detects the operating system and works on Windows, macOS and Linux.
+A simple desktop pet implemented in Python with `tkinter`. The pet walks around the screen and can be dragged with the mouse. When your cursor comes within 300 pixels of the pet it performs a short dash horizontally toward the cursor's vertical position. When walking normally, the pet now chooses a direction and continues for a few steps before deciding where to go next. The code detects the operating system and works on Windows, macOS and Linux.
 
 ## Requirements
 
