@@ -22,6 +22,7 @@ class DesktopPet:
         gif_left_path,
         start_pos=(100, 300),
         max_dash_distance=200,
+        dash_trigger_distance=500,
     ):
         self.master = master
         self.master.overrideredirect(True)
@@ -63,6 +64,7 @@ class DesktopPet:
         self.dash_remaining = 0
         self.dash_step_x = 0
         self.max_dash_distance = max_dash_distance
+        self.dash_trigger_distance = dash_trigger_distance
 
         # 拖曳
         self.label.bind("<Button-1>", self.start_drag)
@@ -118,7 +120,7 @@ class DesktopPet:
             dy = pointer_y - self.pos_y
             distance = (dx ** 2 + dy ** 2) ** 0.5
 
-            if distance <= 500:
+            if distance <= self.dash_trigger_distance:
                 self.start_dash()
             elif random.random() < 0.1:
                 self.set_idle()
@@ -169,8 +171,8 @@ class DesktopPet:
         dy = pointer_y - self.pos_y
         distance = (dx ** 2 + dy ** 2) ** 0.5
 
-        # Only dash when the cursor is within 500px of the pet
-        if distance > 500:
+        # Only dash when the cursor is within dash_trigger_distance
+        if distance > self.dash_trigger_distance:
             return
 
         if abs(dx) > self.max_dash_distance:
