@@ -1,6 +1,7 @@
 import tkinter as tk
 import random
 import ctypes
+import ctypes.wintypes
 import sys
 from enum import Enum, auto
 
@@ -81,6 +82,14 @@ class DesktopPet:
         self.auto_move()
         self.master.geometry(f"+{self.pos_x}+{self.pos_y}")
 
+    def get_cursor_pos(self):
+        """Return global cursor coordinates across platforms."""
+        if sys.platform.startswith("win"):
+            pt = ctypes.wintypes.POINT()
+            ctypes.windll.user32.GetCursorPos(ctypes.byref(pt))
+            return pt.x, pt.y
+        return self.master.winfo_pointerx(), self.master.winfo_pointery()
+
     def animate(self):
         frame = self.current_frames[self.idx]
         self.label.config(image=frame)
@@ -96,8 +105,9 @@ class DesktopPet:
         if self.state != PetState.DRAG:
             return
 
-        new_x = event.x_root - self.offset_x
-        new_y = event.y_root - self.offset_y
+        pointer_x, pointer_y = self.get_cursor_pos()
+        new_x = pointer_x - self.offset_x
+        new_y = pointer_y - self.offset_y
 
         if new_x > self.pos_x:
             self.direction = 1
@@ -114,8 +124,7 @@ class DesktopPet:
 
     def auto_move(self):
         if self.state not in (PetState.DRAG, PetState.DASH):
-            pointer_x = self.master.winfo_pointerx()
-            pointer_y = self.master.winfo_pointery()
+            pointer_x, pointer_y = self.get_cursor_pos()
             dx = pointer_x - self.pos_x
             dy = pointer_y - self.pos_y
             distance = (dx ** 2 + dy ** 2) ** 0.5
@@ -164,8 +173,7 @@ class DesktopPet:
 
     def start_dash(self):
         """Dash horizontally toward the cursor if it is close enough."""
-        pointer_x = self.master.winfo_pointerx()
-        pointer_y = self.master.winfo_pointery()
+        pointer_x, pointer_y = self.get_cursor_pos()
 
         dx = pointer_x - self.pos_x
         dy = pointer_y - self.pos_y
