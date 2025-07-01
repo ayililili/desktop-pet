@@ -112,7 +112,13 @@ class DesktopPet:
 
     def auto_move(self):
         if self.state not in (PetState.DRAG, PetState.DASH):
-            if random.random() < 0.01:
+            pointer_x = self.master.winfo_pointerx()
+            pointer_y = self.master.winfo_pointery()
+            dx = pointer_x - self.pos_x
+            dy = pointer_y - self.pos_y
+            distance = (dx ** 2 + dy ** 2) ** 0.5
+
+            if distance <= 500:
                 self.start_dash()
             elif random.random() < 0.1:
                 self.set_idle()
