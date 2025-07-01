@@ -22,6 +22,7 @@ class DesktopPet:
         gif_left_path,
         start_pos=(100, 300),
         max_dash_distance=200,
+        dash_trigger_distance=500,
     ):
         self.master = master
         self.master.overrideredirect(True)
@@ -63,6 +64,7 @@ class DesktopPet:
         self.dash_remaining = 0
         self.dash_step_x = 0
         self.max_dash_distance = max_dash_distance
+        self.dash_trigger_distance = dash_trigger_distance
 
         # 拖曳
         self.label.bind("<Button-1>", self.start_drag)
@@ -112,7 +114,13 @@ class DesktopPet:
 
     def auto_move(self):
         if self.state not in (PetState.DRAG, PetState.DASH):
-            if random.random() < 0.01:
+            pointer_x = self.master.winfo_pointerx()
+            pointer_y = self.master.winfo_pointery()
+            dx = pointer_x - self.pos_x
+            dy = pointer_y - self.pos_y
+            distance = (dx ** 2 + dy ** 2) ** 0.5
+
+            if distance <= self.dash_trigger_distance:
                 self.start_dash()
             elif random.random() < 0.1:
                 self.set_idle()
@@ -123,7 +131,9 @@ class DesktopPet:
                     self.direction = random.choice([-1, 1])
                     self.walk_steps_remaining = random.randint(3, 7)
                 self.current_frames = (
-                    self.frames_right if self.direction == 1 else self.frames_left
+                    self.frames_right
+                    if self.direction == 1
+                    else self.frames_left
                 )
                 self.set_walk()
                 self.walk_steps_remaining -= 1
@@ -153,14 +163,20 @@ class DesktopPet:
         self.state = PetState.WALK
 
     def start_dash(self):
-        """Start a short dash toward the current mouse cursor position."""
+        """Dash horizontally toward the cursor if it is close enough."""
         pointer_x = self.master.winfo_pointerx()
+        pointer_y = self.master.winfo_pointery()
 
         dx = pointer_x - self.pos_x
-        distance = abs(dx)
+        dy = pointer_y - self.pos_y
+        distance = (dx ** 2 + dy ** 2) ** 0.5
 
-        if distance > self.max_dash_distance:
-            scale = self.max_dash_distance / distance
+        # Only dash when the cursor is within dash_trigger_distance
+        if distance > self.dash_trigger_distance:
+            return
+
+        if abs(dx) > self.max_dash_distance:
+            scale = self.max_dash_distance / abs(dx)
             pointer_x = self.pos_x + dx * scale
             dx = pointer_x - self.pos_x
 
